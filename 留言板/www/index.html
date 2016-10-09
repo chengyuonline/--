@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ZH-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name='author' content='程宇'>
+    <script src='js/jquery-3.0.0.js'></script>
+    <link rel="stylesheet " type="text/css " href="css/globle.css " />
+    <link rel="stylesheet " type="text/css " href="css/style.css " />
+    <title>留言系统</title>
+    <style>
+
+    </style>
+</head>
+<body>
+<main class="main">
+    <ul class="message-add clearfix">
+        <li>
+            <label>标题：</label>
+            <!-- required 必须填写内容-->
+            <!-- pattern -->
+            <input type="text" class="input-text" name="title" required>
+            <span id="title" style="display:none;"></span>
+        </li>
+        <li>
+            <label>内容：</label>
+            <textarea class="textarea" name="content" required></textarea>
+            <span id="content" style="display:none"></span>
+        </li>
+        <li>
+            <label>&nbsp;</label>
+            <input class="submit-btn" type="submit" value="提交留言">
+        </li>
+    </ul>
+    <ul class="message-list clearfix">
+        <div class="ps">
+            <div class="ph"><img src="images/a1.jpg" alt="">   </div>
+            <span>用户名：张三</span>
+        </div>
+        
+        <li>
+            <div class="sanjiao"></div>
+            <h2>全球最大的中文搜索引擎、最大的中文网站</h2>
+            <p class="pinfo"><span class="span-ip">ip地址：192.168.3.185</span>
+                <span class="span-time">发布时间：2016-09-29</span></p>
+            <p class="pcontent">百度拥有数万名研发工程师，这是中国乃至全球最为优秀的技术团队。这支队伍掌握着世界上最为先进的搜索引擎技术，使百度成为中国掌握世界尖端科学核心技术的中国高科技企业，也使中国成为美国、俄罗斯、和韩国之外，全球仅有的4个拥有搜索引擎核心技术的国家之一。</p>
+            <div class="underline"></div>
+        </li>
+
+    </ul>
+</main>
+<script>
+  $(function(){
+      //读取
+      function loadMessages(){
+          $.get('/load',function(resText,status,xhr){
+                if(status == 'success'){
+                    var obj = JSON.parse('['+resText+']');
+                    // console.log(obj);
+                    var messages='';
+                    //处理ip
+                    function formatIp(ip){
+                        if( ip.slice(0,7) == ("::ffff:") ){
+                            return ip.slice(7)
+                        }
+                        if( ip == "::1"){
+                            return '192.168.1.1';
+                        }
+                    }
+                    function formatTime(){
+                        
+                    }
+                    obj.forEach(function(ele,index){
+                        messages +="<div class=\"ps\">"
+                        +"<div class=\"ph\">"+"<img src=\"images/a1.jpg\">"+"</div>"
+                        +"<span>用户名：张三</span>"           
+                        +"</div>"
+                               
+                                +"<li>"
+                                 +"<div class=\"sanjiao\"></div>"
+                        +"<h2>"+ele.title+"</h2>"
+                        +"<p class=\"pinfo\"><span class=\"span-ip\">IP地址："+formatIp(ele.ip)+"</span>"
+                        +" <span class=\"span-time\">"+ele.time+"</span></p>"
+                        +" <p class=\"pcontent\">"+ele.content+"</p>"
+                        +"<div class=\"underline\">"+"</div>"
+                        +" </li>";
+                        $('.message-list').html(messages);
+                    })
+
+                }
+          })
+      }
+      loadMessages();
+      //内容为空时不能提交
+    //   setInterval(
+    //     function check(){
+           
+    //          if($('input[name=title]').val().trim().length==0){
+    //           $('.submit-btn').attr('disabled','true');
+    //           $('#title').html('请输入标题').show().css('color','red');
+    //       }else{
+    //           $('#title').hide();
+    //           if($('textarea').val().trim().length==0){
+    //               $('.submit-btn').attr('disabled','true');
+    //               $('#content').html('内容不能为空').show().css('color','red');
+    //           }else{
+    //               $('#content').hide();
+    //               $('.submit-btn').removeAttr('disabled');
+    //           }
+              
+    //       }
+           
+    //     }
+    // ,50)
+         
+         
+         
+         //点击按钮提交
+      $('.submit-btn').click(function(){
+          var title = $('input[name=title]').val();
+          var content = $('textarea').val();
+        //   alert( a);
+        if(title.trim().length!=0 && content.trim().length!=0){
+          //留言存入 
+          $.get('/save',{title,content},function(resText,status,xhr){
+              if(status=='success'){
+                  if(resText=='ok'){//最好有这句话，接收反馈的信息
+                      loadMessages();
+                  }else{alert('cuowu')}
+
+              }
+          })
+        }else{
+            alert('标题和内容不能为空！')
+        }
+          $('input[name=title]').val('').focus();
+          $('textarea').val('');
+      })
+       
+  })
+</script>
+</body>
+</html>
